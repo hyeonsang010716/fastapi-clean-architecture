@@ -1,6 +1,6 @@
 # Server 스팩
 
-## 의존성 라이브러리 설명
+## 의존성 라이브러리
 
 ### 웹 프레임워크 & API
 - **fastapi[standard]** (0.118.0): 현대적이고 빠른 Python 웹 API 프레임워크. 자동 문서 생성과 타입 검증 지원
@@ -50,3 +50,41 @@
 
 ## 요구사항
 - Python >= 3.12
+
+
+## Directory Structure
+
+```bash
+backend/
+├── alembic/                 # 데이터베이스 마이그레이션 관리
+│
+├── app/
+│   ├── api/                 # REST API 엔드포인트 (라우터, 컨트롤러)
+│   │   └── v1/              # API 버전별 디렉토리
+│   │
+│   ├── config/              # 환경 변수 및 설정 관리
+│   │   └── setting.py       # Pydantic 기반 Setting 객체
+│   │
+│   ├── core/                # 애플리케이션 핵심 모듈
+│   │   ├── dependency/      # 의존성 주입 (DI) 정의
+│   │   └── logger.py        # 로깅 설정 및 유틸리티
+│   │
+│   ├── database/            # 데이터베이스 관련 모듈
+│   │   └── model/           # ORM 모델 정의
+│   │
+│   ├── dto/                 # Data Transfer Object (Service 간 데이터 전달용)
+│   │
+│   ├── middleware/          # 미들웨어 (인증, 로깅, 예외 처리 등)
+│   │
+│   ├── repository/          # 데이터 접근 계층 (DB 쿼리, CRUD)
+│   │
+│   ├── schema/              # Request / Response 검증 스키마 (Pydantic)
+│   │
+│   ├── service/             # 비즈니스 로직 계층
+│   │
+│   └── util/                # 공통 유틸리티 함수
+│
+├── main.py                  # FastAPI 애플리케이션 엔트리 포인트
+├── pyproject.toml           # Python 프로젝트 설정 (uv, poetry 등)
+├── README.md                # 본 문서
+└── uv.lock                  # 패키지 버전 잠금 파일
