@@ -67,6 +67,7 @@ backend/
 │   │
 │   ├── core/                # 애플리케이션 핵심 모듈
 │   │   ├── dependency/      # 의존성 주입 (DI) 정의
+│   │   ├── exception/       # Exception 핸들링 정의
 │   │   └── logger.py        # 로깅 설정 및 유틸리티
 │   │
 │   ├── database/            # 데이터베이스 관련 모듈
