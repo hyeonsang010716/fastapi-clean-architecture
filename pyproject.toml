@@ -1,0 +1,30 @@
+[project]
+name = "server"
+version = "0.1.0"
+description = "server spec"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiofiles==24.1.0",
+    "aiosmtplib==5.0.0",
+    "alembic==1.16.4",
+    "apscheduler==3.11.0",
+    "asyncpg==0.30.0",
+    "beanie==1.26.0",
+    "fastapi[standard]==0.118.0",
+    "langchain==1.0.0",
+    "langchain-chroma==1.0.0",
+    "langchain-openai==1.0.1",
+    "langgraph-checkpoint-sqlite==2.0.1",
+    "loguru==0.7.3",
+    "motor==3.3.2",
+    "passlib[argon2]==1.7.4",
+    "psycopg2-binary==2.9.10",
+    "pydantic-settings==2.10.1",
+    "pyjwt[crypto]==2.10.1",
+    "pymongo==4.6.3",
+    "python-socketio==5.13.0",
+    "pytz==2024.1",
+    "redis==6.4.0",
+    "sqlalchemy[asyncio]==2.0.43",
+]

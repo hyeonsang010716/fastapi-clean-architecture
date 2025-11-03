@@ -1,0 +1,10 @@
+__pycache__/
+mongodb-data/
+postgresql-data/
+.venv/
+
+.env
+logs
+*.log
+
+.vscode/
