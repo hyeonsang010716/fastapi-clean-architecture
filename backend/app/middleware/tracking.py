@@ -79,21 +79,10 @@ class ErrorTrackingMiddleware(BaseHTTPMiddleware):
                 process_time=process_time
             ).info("요청 처리 완료")
             
-            if response.status_code >= 500:
-                req_logger.bind(
-                    status_code=response.status_code
-                ).error("500대 서버 에러 발생")
-            
             return response
             
-        except Exception as e:
-            process_time = time.time() - start_time
-            
-            req_logger.bind(
-                process_time=process_time,
-                exception_type=type(e).__name__,
-                exception_message=str(e)
-            ).exception("미들웨어에서 처리되지 않은 예외 발생")
+        except Exception:
+            # 에러 핸들러에서 잡음
             raise
 
 

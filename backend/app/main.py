@@ -10,6 +10,7 @@ from app.middleware.tracking import (
     ErrorTrackingMiddleware,
     SecurityHeadersMiddleware,
 )
+from app.core.exception.handler import register_exception_handlers
 
 logger = get_logger("main")
 
@@ -64,6 +65,7 @@ def create_app() -> FastAPI:
     )
     logger.bind().debug("CORS 설정 완료")
     
+    register_exception_handlers(app)
     logger.debug("예외 핸들러 등록 완료")
   
     logger.debug("API 라우터 등록 완료")
