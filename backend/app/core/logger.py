@@ -6,6 +6,7 @@ from core.exception.logger import get_logger
 logger = get_logger("service_name")
 
 logger.bind(user_id=123).bind(user_type="he").info("서비스 완료")
+logger.bind(user_id=123, user_type="he").info("서비스 완료")
 """
 import sys
 import logging
