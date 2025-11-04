@@ -90,3 +90,7 @@ backend/
 ├── pyproject.toml           # Python 프로젝트 설정 (uv, poetry 등)
 ├── README.md                # 본 문서
 └── uv.lock                  # 패키지 버전 잠금 파일
+
+
+## 실행
+uv run python -m app.main
