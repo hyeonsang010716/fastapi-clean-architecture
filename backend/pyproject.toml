@@ -23,6 +23,7 @@ dependencies = [
     "pydantic-settings==2.10.1",
     "pyjwt[crypto]==2.10.1",
     "pymongo==4.6.3",
+    "pytest==8.4.2",
     "python-socketio==5.13.0",
     "pytz==2024.1",
     "redis==6.4.0",
