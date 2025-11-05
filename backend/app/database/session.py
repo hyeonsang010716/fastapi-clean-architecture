@@ -1,13 +1,14 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import async_sessionmaker
 from functools import wraps
 
 
 class UnitOfWork:
-    def __init__(self, session: AsyncSession):
-        self.session = session
+    def __init__(self, session: async_sessionmaker):
+        self.session_factory = session
 
     async def __aenter__(self):
+        self.session = self.session_factory()
         return self.session
 
     async def __aexit__(self, exc_type, exc, tb):

@@ -11,6 +11,9 @@ from app.middleware.tracking import (
     SecurityHeadersMiddleware,
 )
 from app.core.exception.handler import register_exception_handlers
+from app.api.v1.router import api_router
+from app.container import Container
+
 
 logger = get_logger("main")
 
@@ -34,6 +37,10 @@ def create_app() -> FastAPI:
     """FastAPI 애플리케이션 팩토리"""
     
     setup_logging()
+    
+    # DI Container 초기화 및 wiring
+    container = Container()
+    container.wire(modules=["app.api.v1.user.register"])
     
     app = FastAPI(
         title="FastAPI Server",
@@ -68,6 +75,7 @@ def create_app() -> FastAPI:
     register_exception_handlers(app)
     logger.debug("예외 핸들러 등록 완료")
   
+    app.include_router(api_router, prefix="/api/v1")
     logger.debug("API 라우터 등록 완료")
  
     @app.get("/health", tags=["health"])
@@ -85,6 +93,8 @@ def create_app() -> FastAPI:
         port=settings.PORT,
         reload=not settings.ENVIRONMENT
     ).success("Uvicorn 서버 시작 완료")
+    
+    app.container = container
     
     return app
 
