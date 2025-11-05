@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
 
@@ -22,22 +22,31 @@ class Settings(BaseSettings):
     LOG_RETENTION: str = Field("30 days", description="로그 파일 롤테이션 기준")
     LOG_COMPRESSION: str = Field("gz", description="로그 롤테이션 파일 압축")
     
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = True
-        
-        json_schema_extra = {
-            "example": {
-                "ENVIRONMENT": "DEV",
-                "DEBUG": False
-            }
-        }
+    # PostgreSQL 정보
+    DB_HOST: str = Field("hyeonsang-postgres", description="PostgreSQL DB HOST")
+    DB_PORT: int = Field(5432, description="PostgreSQL DB PORT")
+    DB_USER: str = Field("cho", description="PostgreSQL DB USER")
+    DB_PASSWORD: str = Field("hyeonsang", description="PostgreSQL DB PASSWORD")
+    DB_NAME: str = Field("chohyeonsang", description="PostgreSQL DB NAME")
+    
+    @property
+    def DATABASE_URL(self) -> str:
+        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+    
+    @property
+    def SYNC_DATABASE_URL(self) -> str:
+        return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
     
     @property
     def is_production(self) -> bool:
         """프로덕션 환경 여부"""
         return not self.DEBUG
+    
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=True
+    )
 
 
 settings = Settings()
