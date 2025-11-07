@@ -19,14 +19,14 @@
 
 ## Why Choose This Template?
 
-**Production-Ready**: Battle-tested patterns and enterprise-grade architecture  
-**Clean Architecture**: Properly separated layers (API → Service → Repository → Database)  
-**Dependency Injection**: Type-safe DI with `dependency-injector` for better testability  
-**Comprehensive Testing**: Unit & Integration tests with 90%+ coverage  
-**Database Migrations**: Seamless schema evolution with Alembic  
-**Dual Database**: PostgreSQL for data + MongoDB for logs & analytics  
-**Modern Stack**: FastAPI + SQLAlchemy 2.0 + Beanie + Python 3.12+  
-**Developer Experience**: Extensive documentation and type hints everywhere  
+- **Production-Ready**: Battle-tested patterns and enterprise-grade architecture  
+- **Clean Architecture**: Properly separated layers (API → Service → Repository → Database)  
+- **Dependency Injection**: Type-safe DI with `dependency-injector` for better testability  
+- **Comprehensive Testing**: Unit & Integration tests with 90%+ coverage  
+- **Database Migrations**: Seamless schema evolution with Alembic  
+- **Dual Database**: PostgreSQL for data + MongoDB for logs & analytics  
+- **Modern Stack**: FastAPI + SQLAlchemy 2.0 + Beanie + Python 3.12+  
+- **Developer Experience**: Extensive documentation and type hints everywhere  
 
 ## Quick Start
 
