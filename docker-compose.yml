@@ -18,6 +18,23 @@ services:
       timeout: 5s
       retries: 5
 
+  mongodb:
+    image: mongo:7-jammy
+    container_name: hyeonsang-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: cho
+      MONGO_INITDB_ROOT_PASSWORD: hyeonsang
+      MONGO_INITDB_DATABASE: chohyeonsang
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - hyeonsang-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: ./backend
@@ -43,3 +60,5 @@ networks:
 volumes:
   postgresql-data:
     name: hyeonsang-postgresql-data
+  mongodb-data:
+    name: hyeonsang-mongodb-data
