@@ -6,6 +6,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
 from app.core.logger import get_logger
+from app.repository.log import LogRepository
 
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
@@ -83,6 +84,63 @@ class ErrorTrackingMiddleware(BaseHTTPMiddleware):
             
         except Exception:
             # 에러 핸들러에서 잡음
+            raise
+
+
+class MongoDBLoggingMiddleware(BaseHTTPMiddleware):
+    """MongoDB에 API 호출 로그를 저장하는 미들웨어"""
+    
+    def __init__(self, app: ASGIApp) -> None:
+        super().__init__(app)
+        self.logger = get_logger("middleware.mongodb_logging")
+    
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        start_time = time.time()
+        
+        try:
+            response = await call_next(request)
+            
+            response_time = (time.time() - start_time) * 1000
+            
+            client_host = request.client.host if request.client else None
+            
+            user_id = getattr(request.state, "user_id", None)
+            
+            try:
+                await LogRepository.create(
+                    called_api=request.url.path,
+                    method=request.method,
+                    status_code=response.status_code,
+                    user_id=user_id,
+                    response_time=response_time,
+                    ip_address=client_host
+                )
+            except Exception as e:
+                self.logger.bind(
+                    error=str(e),
+                    api_path=request.url.path
+                ).error("MongoDB 로그 저장 실패")
+            
+            return response
+            
+        except Exception as e:
+            response_time = (time.time() - start_time) * 1000
+            client_host = request.client.host if request.client else None
+            
+            try:
+                await LogRepository.create(
+                    called_api=request.url.path,
+                    method=request.method,
+                    status_code=500,
+                    response_time=response_time,
+                    ip_address=client_host
+                )
+            except Exception as log_error:
+                self.logger.bind(
+                    error=str(log_error),
+                    api_path=request.url.path
+                ).error("MongoDB 에러 로그 저장 실패")
+            
             raise
 
 
