@@ -82,7 +82,8 @@ backend/
 │   │
 │   ├── database/            # 데이터베이스 관련 모듈
 │   │   ├── model/           # ORM 모델 정의
-│   │   │   └── user.py      # 사용자 모델
+│   │   │   ├── user.py      # 사용자 모델
+│   │   │   └── log.py       # API 로그 모델 (MongoDB)
 │   │   └── session.py       # 데이터베이스 세션 관리
 │   │
 │   ├── dto/                 # Data Transfer Object (Service 간 데이터 전달용)
@@ -92,7 +93,8 @@ backend/
 │   │   └── tracking.py      # 요청 추적 미들웨어
 │   │
 │   ├── repository/          # 데이터 접근 계층 (DB 쿼리, CRUD)
-│   │   └── user.py          # 사용자 리포지토리
+│   │   ├── user.py          # 사용자 리포지토리
+│   │   └── log.py           # 로그 리포지토리 (MongoDB)
 │   │
 │   ├── schema/              # Request / Response 검증 스키마 (Pydantic)
 │   │   └── user.py          # 사용자 스키마
@@ -101,6 +103,7 @@ backend/
 │   │   └── user.py          # 사용자 서비스
 │   │
 │   ├── util/                # 공통 유틸리티 함수
+│   │   └── id_generator.py  # UUID 생성 유틸리티
 │   │
 │   ├── container.py         # 의존성 주입 (DI) 컨테이너 정의
 │   └── main.py              # FastAPI 애플리케이션 진입점

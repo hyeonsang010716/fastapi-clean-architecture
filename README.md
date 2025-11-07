@@ -6,6 +6,7 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.118.0-green.svg)
 ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0+-red.svg)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Ready-blue.svg)
+![MongoDB](https://img.shields.io/badge/MongoDB-Ready-green.svg)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)
 
 **A production-ready FastAPI template featuring clean architecture, dependency injection patterns, Alembic migrations, and organized project structure for scalable API development.**
@@ -23,7 +24,8 @@
 **Dependency Injection**: Type-safe DI with `dependency-injector` for better testability  
 **Comprehensive Testing**: Unit & Integration tests with 90%+ coverage  
 **Database Migrations**: Seamless schema evolution with Alembic  
-**Modern Stack**: FastAPI + SQLAlchemy 2.0 + Python 3.12+  
+**Dual Database**: PostgreSQL for data + MongoDB for logs & analytics  
+**Modern Stack**: FastAPI + SQLAlchemy 2.0 + Beanie + Python 3.12+  
 **Developer Experience**: Extensive documentation and type hints everywhere  
 
 ## Quick Start
@@ -50,7 +52,7 @@ nano .env
 
 ### 3. Start with Docker
 ```bash
-# Start all services (API + PostgreSQL + Redis)
+# Start all services (API + PostgreSQL + MongoDB + Redis)
 docker-compose up -d
 
 # Or run locally
@@ -78,7 +80,8 @@ open http://localhost:8000/docs
 ├── API Layer          # FastAPI routers & endpoints
 ├── Service Layer      # Business logic & validation  
 ├── Repository Layer   # Database operations & queries
-├── Database Layer     # SQLAlchemy models & migrations
+├── Database Layer     # Dual DB: PostgreSQL (main) + MongoDB (logs)
+├── Middleware Layer   # Request tracking, logging, security
 └── Testing Layer     # Unit & Integration tests
 ```
 
@@ -124,7 +127,6 @@ class UserService:
 container = Container()
 container.user_service()  # Automatically resolves dependencies
 container.user_repository() 
-```
 
 ### **Production-Grade Testing**
 ```python
@@ -149,6 +151,23 @@ alembic revision --autogenerate -m "Add user table"
 alembic upgrade head
 
 # Production-ready migration workflow
+```
+
+### **Dual Database Architecture**
+```python
+# PostgreSQL for relational data
+async with AsyncSession() as session:
+    user = await user_repository.create(user_data)
+
+# MongoDB for logs & analytics
+@app.middleware("http")
+async def log_requests(request, call_next):
+    response = await call_next(request)
+    await LogRepository.create(
+        called_api=request.url.path,
+        status_code=response.status_code,
+        response_time=response.headers["X-Process-Time"]
+    )
 ```
 
 ### **AI & LLM Ready**
@@ -227,11 +246,10 @@ alembic upgrade head
 ### **Docker Development**
 ```bash
 # Complete development environment
-docker-compose up -d  # PostgreSQL + Redis + API
+docker-compose up -d  # PostgreSQL + MongoDB + Redis + API
 
 # Container-based migrations
 docker exec -it api-container alembic upgrade head
-```
 
 ## Tech Stack
 
@@ -239,6 +257,7 @@ docker exec -it api-container alembic upgrade head
 |----------|------------|---------|
 | **API Framework** | FastAPI 0.118.0 | High-performance async API |
 | **Database** | PostgreSQL + SQLAlchemy 2.0 | Relational data with async ORM |
+| **NoSQL Database** | MongoDB + Beanie | API logs & unstructured data |
 | **Cache** | Redis | Session storage & caching |
 | **Migrations** | Alembic | Schema version control |
 | **Testing** | pytest + pytest-asyncio | Unit & integration testing |
@@ -246,6 +265,7 @@ docker exec -it api-container alembic upgrade head
 | **AI/ML** | LangChain + OpenAI | LLM integration ready |
 | **Validation** | Pydantic | Request/response validation |
 | **Authentication** | JWT + Passlib | Secure token-based auth |
+| **Logging** | Loguru + MongoDB | Structured logging & API analytics |
 | **Deployment** | Docker + uv | Containerized deployment |
 
 ## Documentation
