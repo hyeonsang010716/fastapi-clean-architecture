@@ -14,7 +14,7 @@ from app.dto.user import UserCreateDTO, UserUpdateDTO, UserDTO
 """
 
 # SQLite 인메모리 데이터베이스 URL (테스트용)
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+TEST_RDB_URL = "sqlite+aiosqlite:///:memory:"
 
 @pytest.fixture(scope="session")
 def event_loop():
@@ -28,7 +28,7 @@ def event_loop():
 async def test_engine():
     """Create test database engine"""
     engine = create_async_engine(
-        TEST_DATABASE_URL,
+        TEST_RDB_URL,
         echo=False,
         future=True,
     )

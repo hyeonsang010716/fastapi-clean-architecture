@@ -77,7 +77,7 @@ def run_migrations_offline() -> None:
     URL만으로 컨텍스트를 구성하고 Engine은 사용하지 않습니다.
     Engine 생성을 생략함으로써 DBAPI가 사용 가능하지 않아도 됩니다.
     """
-    url = settings.SYNC_DATABASE_URL
+    url = settings.SYNC_RDB_URL
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -95,7 +95,7 @@ def run_migrations_online() -> None:
     Engine을 생성하고 컨텍스트와 연결을 연결해야 합니다.
     """
     configuration = config.get_section(config.config_ini_section)
-    configuration['sqlalchemy.url'] = settings.SYNC_DATABASE_URL
+    configuration['sqlalchemy.url'] = settings.SYNC_RDB_URL
     
     connectable = engine_from_config(
         configuration,
@@ -123,7 +123,7 @@ else:
 
 - **경로 설정**: `sys.path.append()`로 app 디렉토리를 Python 경로에 추가
 - **모델 임포트**: `from app.database.model import *`로 모든 모델을 가져옴
-- **데이터베이스 URL**: `settings.SYNC_DATABASE_URL` 사용 (동기식 PostgreSQL URL)
+- **데이터베이스 URL**: `settings.SYNC_RDB_URL` 사용 (동기식 PostgreSQL URL)
 - **메타데이터**: `Base.metadata`를 `target_metadata`로 설정
 
 ## 마이그레이션 실행
@@ -284,7 +284,7 @@ from app.database.model import *
 
 #### 3. 데이터베이스 연결 오류
 
-- `settings.SYNC_DATABASE_URL`이 올바른지 확인
+- `settings.SYNC_RDB_URL`이 올바른지 확인
 - PostgreSQL 서비스가 실행 중인지 확인
 - Docker 컨테이너가 데이터베이스에 접근할 수 있는지 확인
 
