@@ -13,6 +13,7 @@ from app.middleware.tracking import (
 )
 from app.core.exception.handler import register_exception_handlers
 from app.database.session import init_mongodb, close_mongodb
+from app.core.redis import get_redis_client, close_redis
 from app.api.v1.router import api_router
 from app.container import Container
 
@@ -24,7 +25,18 @@ logger = get_logger("main")
 async def lifespan(app: FastAPI):
     """애플리케이션 생명주기 관리"""
     
+    # MongoDB 초기화
     await init_mongodb()
+    logger.info("MongoDB 연결 완료")
+    
+    # Redis 초기화
+    redis_client = await get_redis_client()
+    try:
+        await redis_client.ping()
+        logger.info("Redis 연결 완료")
+    except Exception as e:
+        logger.error(f"Redis 연결 실패: {e}")
+        raise
     
     logger.bind(
         app_title=app.title,
@@ -34,7 +46,12 @@ async def lifespan(app: FastAPI):
     
     yield
     
+    # 종료 시 정리
     await close_mongodb()
+    logger.info("MongoDB 연결 종료")
+    
+    await close_redis()
+    logger.info("Redis 연결 종료")
     
     logger.info("애플리케이션 종료")
 
@@ -91,7 +108,17 @@ def create_app() -> FastAPI:
             "status": "healthy",
             "version": app.version,
             "environment": settings.ENVIRONMENT,
+            "services": {}
         }
+        
+        try:
+            redis_client = await get_redis_client()
+            await redis_client.ping()
+            health_status["services"]["redis"] = "healthy"
+        except Exception as e:
+            health_status["services"]["redis"] = f"unhealthy: {str(e)}"
+            health_status["status"] = "degraded"
+            
         logger.bind(**health_status).debug("헬스 체크")
         return health_status
     
