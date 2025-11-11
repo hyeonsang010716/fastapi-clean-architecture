@@ -20,7 +20,7 @@
 
 ### AI & LLM 통합
 - **langchain** (1.0.0): LLM 애플리케이션 개발 프레임워크
-- **langchain-chroma** (1.0.0): Chroma 벡터 데이터베이스와 LangChain 통합
+- **langchain-chroma** (1.0.0): 벡터 임베딩 저장 및 검색을 위한 Chroma 벡터 데이터베이스와 LangChain 통합
 - **langchain-openai** (1.0.1): OpenAI API와 LangChain 통합
 - **langgraph-checkpoint-sqlite** (2.0.1): LangGraph 상태 관리용 SQLite 체크포인트 저장소
 
@@ -48,7 +48,9 @@
 - 다중 데이터베이스 지원 (PostgreSQL, MongoDB, Redis)
 - 비동기 작업 처리 및 스케줄링
 - JWT 기반 인증
-- LLM 통합 및 벡터 검색
+- LLM 통합 및 벡터 검색 (ChromaDB)
+- AI 에이전트 플로우 관리 (LangGraph)
+- 다중 LLM 모델 관리 (GPT-5, GPT-4o, GPT-4o-mini)
 - 이메일 발송
 - 실시간 통신
 
@@ -78,6 +80,14 @@ backend/
 │   ├── core/                # 애플리케이션 핵심 모듈
 │   │   ├── exception/       # Exception 핸들링 정의
 │   │   │   └── handler.py   # 예외 처리 핸들러
+│   │   ├── graph/           # AI 에이전트 그래프 플로우
+│   │   │   └── example/     # 예제 AI 에이전트 구현
+│   │   │       ├── chain_builder.py       # LangChain 체인 빌더
+│   │   │       ├── graph_orchestrator.py  # LangGraph 오케스트레이션
+│   │   │       ├── graph_state.py         # 그래프 상태 정의
+│   │   │       └── prompt_manager.py      # 프롬프트 템플릿 관리
+│   │   ├── chroma_manager.py # ChromaDB 벡터 데이터베이스 관리
+│   │   ├── llm_manager.py    # OpenAI LLM 모델 관리
 │   │   ├── logger.py        # 로깅 설정 및 유틸리티
 │   │   └── redis.py         # Redis 클라이언트 관리
 │   │
@@ -104,6 +114,7 @@ backend/
 │   │   └── user.py          # 사용자 서비스
 │   │
 │   ├── util/                # 공통 유틸리티 함수
+│   │   ├── agent_assistant.py # AI 에이전트 헬퍼 함수
 │   │   └── id_generator.py  # UUID 생성 유틸리티
 │   │
 │   ├── container.py         # 의존성 주입 (DI) 컨테이너 정의
@@ -125,6 +136,8 @@ backend/
 - **PostgreSQL**: 메인 데이터베이스 연결
 - **MongoDB**: 로그 저장소 연결 
 - **Redis**: 캐싱 및 세션 저장소 연결
+- **ChromaDB**: 벡터 임베딩 데이터베이스 초기화
+- **LLM Manager**: OpenAI 모델 초기화
 
 ### 2. 실행 명령어
 ```bash
@@ -143,3 +156,26 @@ uv run python -m app.main
   }
 }
 ```
+
+## AI 에이전트 시스템
+
+### ChromaDB 관리자
+싱글톤 패턴으로 구현된 벡터 데이터베이스 관리자로, 다음 기능을 제공합니다:
+- 벡터 임베딩 저장 및 검색
+- 컬렉션별 문서 관리
+- 유사도 기반 검색
+- OpenAI text-embedding-3-large 모델 사용
+
+### LLM 관리자
+다중 LLM 모델을 관리하는 싱글톤 매니저:
+- GPT-5, GPT-4o, GPT-4o-mini 모델 지원
+- 모델별 초기화 및 관리
+- LangChain 통합
+
+### LangGraph 기반 AI 에이전트
+예제 AI 에이전트 플로우 싱글톤 구현:
+- **GraphOrchestrator**: LangGraph 워크플로우 오케스트레이션
+- **ChainBuilder**: LangChain 체인 구성 관리
+- **PromptManager**: 프롬프트 템플릿 중앙 관리
+- **GraphState**: 에이전트 상태 관리 (메시지, 문서, 답변)
+- SQLite 기반 대화 이력 저장
