@@ -9,10 +9,13 @@
 ![MongoDB](https://img.shields.io/badge/MongoDB-Ready-green.svg)
 ![Redis](https://img.shields.io/badge/Redis-Ready-red.svg)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)
+![LangChain](https://img.shields.io/badge/LangChain-Ready-orange.svg)
+![LangGraph](https://img.shields.io/badge/LangGraph-Ready-green.svg)
+![ChromaDB](https://img.shields.io/badge/ChromaDB-Ready-purple.svg)
 
-**A production-ready FastAPI template featuring clean architecture, dependency injection patterns, Alembic migrations, and organized project structure for scalable API development.**
+**A production-ready FastAPI template featuring clean architecture, dependency injection patterns, Alembic migrations, AI/LLM integration, and organized project structure for scalable API development.**
 
-[🌟 **Give it a Star!**](#star-this-repo) • [📖 Documentation](#documentation) • [🛠️ Quick Start](#quick-start) • [🧪 Testing](#testing--quality-assurance)
+[🛠️ Quick Start](#quick-start) • [🧪 Testing](#testing--quality-assurance)
 
 </div>
 
@@ -26,6 +29,7 @@
 - **Comprehensive Testing**: Unit & Integration tests with 90%+ coverage  
 - **Database Migrations**: Seamless schema evolution with Alembic  
 - **Dual Database**: PostgreSQL for data + MongoDB for logs & analytics  
+- **AI/LLM Integration**: LangChain + ChromaDB + LangGraph for intelligent applications  
 - **Modern Stack**: FastAPI + SQLAlchemy 2.0 + Beanie + Python 3.12+  
 - **Developer Experience**: Extensive documentation and type hints everywhere  
 
@@ -49,6 +53,12 @@ cp .env.example .env
 
 # Edit your environment variables
 nano .env
+```
+
+**Required AI/LLM Variables:**
+```env
+# OpenAI API Configuration
+OPENAI_API_KEY=your-api-key-here
 ```
 
 ### 3. Start with Docker
@@ -101,11 +111,19 @@ backend/
 ├── app/
 │   ├── api/v1/           # REST API endpoints
 │   ├── config/           # Environment & settings  
+│   ├── core/             # Core application modules
+│   │   ├── graph/        # LangGraph AI agent workflows
+│   │   ├── chroma_manager.py # ChromaDB vector store
+│   │   ├── llm_manager.py    # LLM model management
+│   │   ├── logger.py     # Logging configuration
+│   │   └── redis.py      # Redis client
 │   ├── service/          # Business logic
 │   ├── repository/       # Data access layer
 │   ├── database/         # Models & session management
 │   ├── schema/           # Pydantic request/response models
 │   ├── dto/              # Data transfer objects
+│   ├── util/             # Helper utilities
+│   │   └── agent_assistant.py # AI agent helpers
 │   └── container.py      # Dependency injection setup
 ├── test/
 │   ├── unit/             # Fast unit tests with mocks
@@ -211,15 +229,68 @@ async def log_requests(request, call_next):
     )
 ```
 
-### **AI & LLM Ready**
-```python
-# Built-in LangChain integration
-from langchain_openai import OpenAI
-from app.service.ai import AIService
+### **AI & LLM Integration**
 
-ai_service = AIService()
-response = await ai_service.chat("Hello, AI!")
+#### **ChromaDB Vector Store**
+```python
+# Singleton ChromaDB manager for vector embeddings
+from app.core.chroma_manager import ChromaManager
+
+chroma = ChromaManager.get_instance()
+
+# Store document embeddings
+await chroma.add_documents(
+    collection_name="knowledge_base",
+    documents=["Document content..."],
+    metadata=[{"source": "api_docs"}]
+)
+
+# Semantic search
+results = await chroma.search(
+    collection_name="knowledge_base",
+    query="How to implement authentication?",
+    k=5
+)
 ```
+
+#### **Multi-Model LLM Management**
+```python
+# Singleton LLM manager supporting multiple models
+from app.core.llm_manager import LLMManager
+
+llm_manager = LLMManager.get_instance()
+
+# Get specific model
+gpt5 = llm_manager.get_llm("gpt-5")
+gpt4o = llm_manager.get_llm("gpt-4o")
+gpt4o_mini = llm_manager.get_llm("gpt-4o-mini")
+
+# Use in chains
+response = await gpt5.ainvoke("Explain quantum computing")
+```
+
+#### **LangGraph AI Agents**
+```python
+# Example AI agent with stateful workflow
+from app.core.graph.example import GraphOrchestrator
+
+orchestrator = GraphOrchestrator.get_instance()
+
+# Run agent workflow
+result = await orchestrator.run_graph({
+    "messages": [{"role": "user", "content": "Analyze this data"}],
+    "documents": ["doc1", "doc2"]
+})
+
+# Access conversation history (SQLite persisted)
+history = await orchestrator.get_conversation_history()
+```
+
+#### **Agent Components**
+- **GraphOrchestrator**: Manages LangGraph workflows with state persistence
+- **ChainBuilder**: Constructs LangChain chains for different tasks
+- **PromptManager**: Centralized prompt template management
+- **GraphState**: Manages agent state (messages, documents, answers)
 
 ## Testing & Quality Assurance
 
@@ -313,7 +384,9 @@ docker exec -it redis-container redis-cli
 | **Migrations** | Alembic | Schema version control |
 | **Testing** | pytest + pytest-asyncio | Unit & integration testing |
 | **DI Container** | dependency-injector | Type-safe dependency injection |
-| **AI/ML** | LangChain + OpenAI | LLM integration ready |
+| **AI/ML** | LangChain + OpenAI | LLM integration & orchestration |
+| **Vector DB** | ChromaDB | Semantic search & embeddings |
+| **AI Workflow** | LangGraph | Stateful AI agent workflows |
 | **Validation** | Pydantic | Request/response validation |
 | **Authentication** | JWT + Passlib | Secure token-based auth |
 | **Logging** | Loguru + MongoDB | Structured logging & API analytics |
