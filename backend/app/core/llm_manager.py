@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 from langchain_openai import ChatOpenAI
 from enum import Enum
 
@@ -20,52 +20,50 @@ class ModelName(str, Enum):
 class LLMManager:
     """LLM 모델을 관리하는 클래스"""
     
-    _models: Dict[str, ChatOpenAI] = {}
-    _initialized: bool = False
+    _instance: Optional['LLMManager'] = None
+    
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super().__new__(cls)
+        return cls._instance
     
     def __init__(self):
-        raise RuntimeError("LLMManager는 인스턴스를 생성할 수 없습니다.")
+        if hasattr(self, '_initialized'):
+            return
+            
+        self._models: Dict[str, ChatOpenAI] = {}
+        self._initialized = False
     
-    @classmethod
-    def _initialize(cls) -> None:
+    def initialize(self) -> bool:
         """모든 LLM 모델을 초기화합니다."""
-        if not cls._initialized:
+        if not self._initialized:
             for model in ModelName:
-                cls._models[model.value] = ChatOpenAI(
+                self._models[model.value] = ChatOpenAI(
                     api_key=settings.OPENAI_API_KEY,
                     model=model.value
                 )
-            cls._initialized = True
-    
-    @classmethod
-    def get_model(cls, model_name: str) -> ChatOpenAI:
-        """모델 이름으로 LLM 모델을 반환합니다."""
-        if not cls._initialized:
-            cls._initialize()
+            self._initialized = True
         
-        if model_name not in cls._models:
+        return self._initialized
+    
+    def get_model(self, model_name: str) -> ChatOpenAI:
+        """모델 이름으로 LLM 모델을 반환합니다."""
+        if not self._initialized:
+            self.initialize()
+        
+        if model_name not in self._models:
             raise ValueError(
                 f"Model '{model_name}' not found. "
                 f"Available models: {', '.join(ModelName.values())}"
             )
         
-        return cls._models[model_name]
+        return self._models[model_name]
     
-    @classmethod
-    def is_initialized(cls) -> bool:
+    def is_initialized(self) -> bool:
         """초기화 상태를 반환합니다."""
-        return cls._initialized
+        return self._initialized
 
 
-def initialize_llm_manager() -> None:
-    """LLM Manager 초기화 함수"""
-    LLMManager._initialize()
-
-def check_llm_model(model_name: str) -> bool:
-    """사용 가능한 LLM 모델인지 체크하는 함수"""
-    return model_name in ModelName.values()
-
-
-def get_llm_model(model: ModelName) -> ChatOpenAI:
-    """모델 가져오기"""
-    return LLMManager.get_model(model.value)
+def get_llm_manager() -> LLMManager:
+    """LLMManager 싱글톤 인스턴스를 반환합니다."""
+    return LLMManager()
