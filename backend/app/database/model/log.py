@@ -18,7 +18,7 @@ class Log(Document):
         name = "log"
         
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "created_at": "2024-01-01T12:00:00Z",
                 "called_api": "/api/v1/user/register",
