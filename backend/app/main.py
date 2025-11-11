@@ -14,7 +14,9 @@ from app.middleware.tracking import (
 from app.core.exception.handler import register_exception_handlers
 from app.database.session import init_mongodb, close_mongodb
 from app.core.redis import get_redis_client, close_redis
-from app.core.llm_manager import initialize_llm_manager
+from app.core.llm_manager import get_llm_manager
+from app.core.chroma_manager import get_chroma_manager
+from app.core.graph.example.graph_orchestrator import example_graph
 from app.api.v1.router import api_router
 from app.container import Container
 
@@ -40,7 +42,23 @@ async def lifespan(app: FastAPI):
         raise
     
     # LLM 초기화
-    initialize_llm_manager()
+    llm_manger = get_llm_manager()
+    if llm_manger.initialize():
+        logger.info("LLM 초기화 성공")
+    else:
+        logger.warning("LLM 초기화 실패 - 기능이 제한될 수 있습니다")
+    
+    # ChromaDB 초기화
+    chroma_manager = get_chroma_manager()
+    init_success = await chroma_manager.initialize()
+    
+    if init_success:
+        logger.info("ChromaDB 초기화 성공")
+    else:
+        logger.warning("ChromaDB 초기화 실패 - 기능이 제한될 수 있습니다")
+    
+    await example_graph.initialize()
+    logger.info("Agent 초기화 성공")
     
     logger.bind(
         app_title=app.title,
@@ -56,6 +74,9 @@ async def lifespan(app: FastAPI):
     
     await close_redis()
     logger.info("Redis 연결 종료")
+    
+    await example_graph.cleanup()
+    logger.info("Agent 연결 종료")
     
     logger.info("애플리케이션 종료")
 
