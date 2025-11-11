@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     LOG_RETENTION: str = Field("30 days", description="로그 파일 롤테이션 기준")
     LOG_COMPRESSION: str = Field("gz", description="로그 롤테이션 파일 압축")
     
+    # LLM KEY
+    OPENAI_API_KEY: str = Field("sk-", description="OpenAI API KEY")
+    
     # POSTGRES 정보
     POSTGRES_HOST: str = Field("hyeonsang-postgres", description="POSTGRES HOST")
     POSTGRES_PORT: int = Field(5432, description="POSTGRES PORT")

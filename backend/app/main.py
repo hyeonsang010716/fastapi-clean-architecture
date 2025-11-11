@@ -14,6 +14,7 @@ from app.middleware.tracking import (
 from app.core.exception.handler import register_exception_handlers
 from app.database.session import init_mongodb, close_mongodb
 from app.core.redis import get_redis_client, close_redis
+from app.core.llm_manager import initialize_llm_manager
 from app.api.v1.router import api_router
 from app.container import Container
 
@@ -37,6 +38,9 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Redis 연결 실패: {e}")
         raise
+    
+    # LLM 초기화
+    initialize_llm_manager()
     
     logger.bind(
         app_title=app.title,
