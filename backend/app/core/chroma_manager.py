@@ -11,6 +11,7 @@ from langchain_core.documents import Document
 
 from app.config.setting import settings
 from app.core.logger import get_logger
+from app.core.lock import get_redis_lock
 
 logger = get_logger("chromaDB.manager")
 
@@ -24,9 +25,7 @@ class ChromaManager:
         self.persist_directory = persist_directory
         self.client: Optional[chromadb.PersistentClient] = None
         self._initialized = False
-
-        # 동일 컬렉션을 동시에 만들려 할 때의 충돌 방지
-        self._locks: Dict[str, asyncio.Lock] = {}
+        self._lock = get_redis_lock()
 
     # ---------- 내부 유틸 ----------
 
@@ -35,11 +34,6 @@ class ChromaManager:
         """동기 I/O를 안전하게 오프로딩"""
         return await asyncio.to_thread(fn, *args, **kwargs)
 
-    def _get_lock(self, name: str) -> asyncio.Lock:
-        if name not in self._locks:
-            lock = asyncio.Lock()
-            self._locks[name] = lock
-        return self._locks[name]
 
     def is_initialized(self) -> bool:
         return self._initialized and self.client is not None
@@ -99,8 +93,11 @@ class ChromaManager:
             logger.warning("ChromaDB not initialized")
             return False
 
-        lock = self._get_lock(collection_name)
-        async with lock:
+        async with self._lock.lock(f"chroma:collection:{collection_name}", ttl=60) as acquired:
+            if not acquired:
+                logger.warning(f"Failed to acquire lock for deleting collection '{collection_name}'")
+                return False
+                
             try:
                 self.collections.pop(collection_name, None)
                 await self._to_thread(self.client.delete_collection, collection_name)
@@ -117,8 +114,14 @@ class ChromaManager:
             logger.warning("ChromaDB not initialized")
             return None
 
-        lock = self._get_lock(collection_name)
-        async with lock:
+        if collection_name in self.collections:
+            return self.collections[collection_name]
+
+        async with self._lock.lock(f"chroma:collection:{collection_name}", ttl=60, timeout=10) as acquired:
+            if not acquired:
+                logger.warning(f"Failed to acquire lock for collection '{collection_name}'")
+                return None
+                
             if collection_name in self.collections:
                 return self.collections[collection_name]
 
