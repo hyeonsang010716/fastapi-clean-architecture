@@ -129,6 +129,10 @@ backend/
 ├── data/                 # Persistent data storage
 │   ├── chromadb-data/    # ChromaDB vector database storage
 │   └── sqlite-data/      # SQLite data for LangGraph memory
+├── logs/                 # Application log files
+│   ├── app.log          # Current active log file
+│   ├── app.*.log        # Rotated log files
+│   └── app.*.log.gz     # Compressed archived logs
 ├── test/
 │   ├── unit/             # Fast unit tests with mocks
 │   └── ntegration/      # Full-stack integration tests
@@ -174,6 +178,59 @@ container.user_repository()
     "ip_address": "127.0.0.1"
 }
 ```
+
+### **Production-Ready Logging System**
+
+#### **Environment Configuration**
+```env
+# Logging configuration
+LOG_LEVEL=INFO                        # INFO for production, DEBUG for development
+LOG_FORMAT=console                    # console for dev, json for production
+LOG_FILE_PATH=/backend/logs/app.log   # Container internal path
+LOG_ROTATION=100 MB                   # Rotate after 100MB
+LOG_RETENTION=30 days                 # Delete logs older than 30 days
+LOG_COMPRESSION=gz                    # Compress old logs
+```
+
+#### **Log Structure**
+```
+backend/
+├── logs/
+│   ├── app.log              # Current active log
+│   ├── app.2024-11-25.log   # Rotated log
+│   └── app.2024-11-24.log.gz # Compressed old log
+```
+
+#### **Environment-Specific Settings**
+```env
+# Development
+LOG_LEVEL=DEBUG
+LOG_FILE_PATH=None  # Console only, no file
+
+# Staging/Production
+LOG_LEVEL=INFO
+LOG_FILE_PATH=/backend/logs/app.log
+LOG_FORMAT=json  # For log aggregation systems
+```
+
+#### **Monitoring Logs**
+```bash
+# Real-time container logs
+docker logs -f letuin-backend
+
+# File logs in container
+docker exec letuin-backend tail -f /backend/logs/app.log
+
+# Direct host access
+tail -f ./backend/logs/app.log
+```
+
+#### **Performance & Security**
+- Asynchronous logging with `enqueue=True` (already configured)
+- Automatic rotation prevents disk space issues
+- Compression reduces storage requirements
+- Never log sensitive data (passwords, tokens, API keys)
+- Proper file permissions for security
 
 ### **Redis Caching & Session Management**
 ```python

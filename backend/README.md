@@ -131,6 +131,11 @@ backend/
 │       └── example/         # 예제 에이전트용 SQLite DB
 │           └── sqlite.db    # 대화 이력 저장
 │
+├── logs/                    # 애플리케이션 로그 파일
+│   ├── app.log              # 현재 활성 로그 파일
+│   ├── app.*.log            # 날짜별 롤테이션된 로그
+│   └── app.*.log.gz         # 압축된 아카이브 로그
+│
 ├── test/                    # 테스트 코드
 │   └── README.md            # 테스트 가이드
 │
@@ -228,4 +233,95 @@ if await lock.acquire("resource_lock", ttl=60, timeout=5.0):
         await lock.extend("resource_lock", 30)
     finally:
         await lock.release("resource_lock")
+```
+
+## 로깅 시스템
+
+### 환경 변수 설정
+`.env` 파일에 다음 로깅 설정을 추가합니다:
+
+```env
+# 로깅 설정
+LOG_LEVEL=INFO                        # 평소엔 INFO, 디버깅시 DEBUG
+LOG_FORMAT=console                    # 개발환경: console, 운영: json
+LOG_FILE_PATH=/backend/logs/app.log   # 컨테이너 내부 경로
+LOG_ROTATION=100 MB                   # 100MB마다 새 파일
+LOG_RETENTION=30 days                 # 30일 지난 로그 삭제
+LOG_COMPRESSION=gz                    # 오래된 로그 압축
+```
+
+로그 파일 구조:
+```
+backend/
+├── logs/
+│   ├── app.log              # 현재 활성 로그
+│   ├── app.2024-11-25.log   # 날짜별 롤테이션된 로그
+│   └── app.2024-11-24.log.gz # 압축된 오래된 로그
+```
+
+### 환경별 설정
+
+#### 개발 환경
+```env
+LOG_LEVEL=DEBUG
+LOG_FILE_PATH=None  # 파일 저장 안함, 콘솔만
+LOG_FORMAT=console
+```
+
+#### 스테이징/운영 환경
+```env
+LOG_LEVEL=INFO
+LOG_FILE_PATH=/backend/logs/app.log
+LOG_FORMAT=json  # 로그 수집 시스템 연동시
+```
+
+### 로그 모니터링
+
+```bash
+# 실시간 로그 모니터링 (컨테이너 로그)
+docker logs -f letuin-backend
+
+# 파일 로그 확인 (컨테이너 내부)
+docker exec letuin-backend tail -f /backend/logs/app.log
+
+# 호스트에서 직접 확인
+tail -f ./backend/logs/app.log
+
+# 특정 날짜 로그 확인
+cat ./backend/logs/app.2024-11-25.log
+
+# 압축된 로그 확인
+zcat ./backend/logs/app.2024-11-24.log.gz
+```
+
+### 성능 최적화
+- **비동기 로깅**: `enqueue=True`로 이미 설정되어 있어 비동기 처리됨
+- **적절한 로그 레벨**: 운영 환경에서는 INFO 이상만 기록
+- **자동 압축**: 오래된 로그는 gzip으로 압축하여 디스크 공간 절약
+- **자동 삭제**: 보존 기간 설정으로 무한 증가 방지
+
+### 보안 고려사항
+- 민감한 정보(패스워드, 토큰, API 키) 로그 기록 금지
+- 로그 파일 권한 관리 (755)
+- 프로덕션 환경에서는 로그 수집 시스템 연동 권장
+
+### 로그 포맷
+#### Console 포맷 (개발용)
+```
+2024-11-25 12:00:00.123 | INFO     | app.api.v1.user:create:45 - User created: user_id=123
+```
+
+#### JSON 포맷 (운영용)
+```json
+{
+  "timestamp": "2024-11-25T12:00:00.123Z",
+  "level": "INFO",
+  "logger": "app.api.v1.user",
+  "function": "create",
+  "line": 45,
+  "message": "User created",
+  "extra": {
+    "user_id": 123
+  }
+}
 ```
