@@ -7,5 +7,4 @@ sqlite-data/
 .venv/
 
 .env
-logs
-*.log
+*.log*

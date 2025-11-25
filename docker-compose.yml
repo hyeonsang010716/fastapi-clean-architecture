@@ -71,6 +71,7 @@ services:
       - ./backend/app:/backend/app:ro
       - ./backend/migration:/backend/migration
       - ./backend/data:/backend/data
+      - ./backend/logs:/backend/logs
 
 networks:
   hyeonsang-network:

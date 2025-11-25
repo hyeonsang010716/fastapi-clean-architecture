@@ -87,7 +87,7 @@ def setup_logging() -> None:
             compression=settings.LOG_COMPRESSION,
             format="{message}",
             serialize=True,
-            level=settings.LOG_LEVEL,
+            level="INFO",
             encoding="utf-8",
             enqueue=True
         )
