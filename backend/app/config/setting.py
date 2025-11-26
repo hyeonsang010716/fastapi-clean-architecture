@@ -47,6 +47,12 @@ class Settings(BaseSettings):
     # 인증 정보
     ACCESS_TOKEN: Optional[str] = Field(None, description="API 접근 토큰 (PROD 환경에서만 사용)")
     
+    # Langsmith
+    LANGCHAIN_TRACING_V2: Optional[bool]
+    LANGCHAIN_ENDPOINT: Optional[str]
+    LANGCHAIN_PROJECT: Optional[str]
+    LANGCHAIN_API_KEY: Optional[str]
+    
     @property
     def POSTGRES_URL(self) -> str:
         return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_NAME}"
