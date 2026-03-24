@@ -24,3 +24,9 @@ def generate_payment_id() -> str:
     """결제 고유 ID 생성"""
     timestamp, unique_part = generate_id()
     return f"PAY_{unique_part}_{timestamp}"
+
+
+def generate_progress_id() -> str:
+    """진행률 고유 키 생성"""
+    timestamp, unique_part = generate_id()
+    return f"PGS_{timestamp}_{unique_part}"

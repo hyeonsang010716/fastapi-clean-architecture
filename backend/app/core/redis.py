@@ -12,6 +12,7 @@ class RedisClient:
     DEFAULT_CACHE_TTL = 86400  # 24 hours in seconds
     SHORT_CACHE_TTL = 3600     # 1 hour in seconds
     MEDIUM_CACHE_TTL = 43200   # 12 hours in seconds
+    PROGRESS_TTL = 300         # 5 minutes in seconds
     
     @classmethod
     async def get_client(cls) -> redis.Redis:
