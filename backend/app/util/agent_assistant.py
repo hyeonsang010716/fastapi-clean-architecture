@@ -1,5 +1,6 @@
 from typing import List
 
+
 def format_docs(docs : List) -> str:
     formatted_docs = []
     for i in range(len(docs)):

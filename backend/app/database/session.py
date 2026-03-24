@@ -40,7 +40,7 @@ from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from beanie import init_beanie
 
 from app.config.setting import settings
-from app.database.model.log import Log
+
 
 class MongoDB:
     """MongoDB 클라이언트 및 데이터베이스 관리"""
@@ -55,13 +55,14 @@ class MongoDB:
         
         await init_beanie(
             database=self.database,
-            document_models=[Log]
+            document_models=[]
         )
         
     async def disconnect(self):
         """MongoDB 연결 종료"""
         if self.client:
             self.client.close()
+         
             
 mongodb = MongoDB()
 

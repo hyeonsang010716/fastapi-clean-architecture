@@ -1,6 +1,7 @@
 import uuid
-from datetime import datetime
 from typing import Tuple
+from datetime import datetime
+
 
 def generate_id() -> Tuple[int,str]:
     timestamp = int(datetime.now().timestamp())

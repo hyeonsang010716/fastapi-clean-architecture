@@ -1,25 +1,24 @@
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-import uvicorn
 
-from app.config.setting import settings
-from app.core.logger import setup_logging, get_logger
 from app.middleware.tracking import (
     RequestIDMiddleware,
     ErrorTrackingMiddleware,
-    MongoDBLoggingMiddleware,
     SecurityHeadersMiddleware
 )
 from app.middleware.auth import BearerTokenAuthMiddleware
-from app.core.exception.handler import register_exception_handlers
 from app.database.session import init_mongodb, close_mongodb
 from app.core.redis import get_redis_client, close_redis
+from app.core.logger import setup_logging, get_logger
 from app.core.llm_manager import get_llm_manager
-from app.core.chroma_manager import get_chroma_manager
 from app.core.graph.example.graph_orchestrator import get_example_graph
-from app.api.v1.router import api_router
+from app.core.exception.handler import register_exception_handlers
+from app.core.chroma_manager import get_chroma_manager
+from app.config.setting import settings
 from app.container import Container
+from app.api.v1.router import api_router
 
 
 logger = get_logger("main")
@@ -91,7 +90,7 @@ def create_app() -> FastAPI:
     
     # DI Container 초기화 및 wiring
     container = Container()
-    container.wire(modules=["app.api.v1.user.register"])
+    container.wire(modules=[])
     
     app = FastAPI(
         title="FastAPI Server",
@@ -110,7 +109,6 @@ def create_app() -> FastAPI:
     
     # 미들웨어 등록 (순서 중요함 -> 먼저 등록된 것이 나중에 실행됨)
     app.add_middleware(SecurityHeadersMiddleware)
-    app.add_middleware(MongoDBLoggingMiddleware)
     app.add_middleware(ErrorTrackingMiddleware)
     app.add_middleware(BearerTokenAuthMiddleware)  # 인증 미들웨어 추가
     app.add_middleware(RequestIDMiddleware)

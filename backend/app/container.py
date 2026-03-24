@@ -1,9 +1,8 @@
-from dependency_injector import containers, providers
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from dependency_injector import containers, providers
 
 from app.database.session import UnitOfWork
 from app.config.setting import settings
-from app.service.user import UserService
 
 class Container(containers.DeclarativeContainer):
     """DI Container — 의존성 선언"""
@@ -25,9 +24,3 @@ class Container(containers.DeclarativeContainer):
     )
 
     uow = providers.Factory(UnitOfWork, session=session_factory)
-
-    # 서비스 계층 주입
-    user_service = providers.Factory(UserService, uow=uow)
-    
-    # 컨트롤러 계층 주입
-    user_service_session = providers.Factory(UserService, uow=None)
