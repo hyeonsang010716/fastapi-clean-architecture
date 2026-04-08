@@ -1,10 +1,13 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from functools import wraps
+from contextvars import ContextVar
 
 """
 RDB
 """
+
+_current_session: ContextVar = ContextVar('_current_session', default=None) # 트랜잭션 전파 관리
 
 class UnitOfWork:
     def __init__(self, session: async_sessionmaker):
@@ -23,11 +26,25 @@ class UnitOfWork:
 
 
 def transactional(fn):
-    @wraps(fn)  
+    @wraps(fn)
     async def wrapper(self, *args, **kwargs):
-        async with self.uow as session:
+        existing = _current_session.get()
+        if existing is not None:
+            # 이미 트랜잭션이 열려 있으면 기존 세션에 참여
+            self._session = existing
             return await fn(self, *args, **kwargs)
+
+        # 새 트랜잭션 시작
+        async with self.uow as session:
+            token = _current_session.set(session)
+            self._session = session
+            try:
+                return await fn(self, *args, **kwargs)
+            finally:
+                _current_session.reset(token)
+                self._session = None
     return wrapper
+
 
 Base = declarative_base()
 
