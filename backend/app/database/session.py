@@ -68,7 +68,12 @@ class MongoDB:
         
     async def connect(self):
         """MongoDB 연결 및 초기화"""
-        self.client = AsyncIOMotorClient(settings.MONGODB_URL)
+        self.client = AsyncIOMotorClient(
+            settings.MONGODB_URL,
+            maxPoolSize=100,
+            minPoolSize=10,
+            tz_aware=True,
+        )
         self.database = self.client[settings.MONGODB_NAME]
         
         await init_beanie(
